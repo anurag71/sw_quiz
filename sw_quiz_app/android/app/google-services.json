@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "427662811591",
+    "firebase_url": "https://swquiz-e384c.firebaseio.com",
+    "project_id": "swquiz-e384c",
+    "storage_bucket": "swquiz-e384c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:427662811591:android:d68fca85beb696f5d139e2",
+        "android_client_info": {
+          "package_name": "com.example.sw_quiz_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "427662811591-e8vn207pbqprvemt5f0s9tnpuvn6alst.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCiSQMvgJJ7zgFFsQb69DFIqmGd3TrKAG8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "427662811591-e8vn207pbqprvemt5f0s9tnpuvn6alst.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
