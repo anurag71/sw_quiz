@@ -1,7 +1,7 @@
 class Data {
   var questions = [
     'Who is the PM of India?',
-    'Is car a pet animal?',
+    'Is cat a pet animal?',
   ];
   var choices = [
     ['Narendra Modi', 'A.P.J Abdul Kalam', 'Vikram', 'Sara'],
