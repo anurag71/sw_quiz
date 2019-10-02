@@ -10,61 +10,59 @@ class HomePage extends StatefulWidget {
 //TODO: Get level from Firebase and update score
 
 class _HomePageState extends State<HomePage> {
-
   var _loaded = false;
   var _last = false;
   var radioValue = 0;
   var qno = 0;
-  var finalScore =0;
+  var finalScore = 0;
   var _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  var _level;
+  var _level=1;
   static List<String> questions = new List();
   static List<List<String>> anschoice = new List();
   static List<String> answers = new List();
 
-
-  getData() async{
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    _level = prefs.getInt("level") ?? 1;
+  getData(int _level) async {
+//    SharedPreferences prefs = await SharedPreferences.getInstance();
 
     List<DocumentSnapshot> list;
-    CollectionReference collectionReference = Firestore.instance.collection("levels/njo6yAWcxYnIRzmVL1G9/"+_level.toString());
+    CollectionReference collectionReference = Firestore.instance
+        .collection("levels/njo6yAWcxYnIRzmVL1G9/" + _level.toString());
     QuerySnapshot querySnapshot = await collectionReference.getDocuments();
 
     list = querySnapshot.documents;
     // ignore: sdk_version_set_literal
     list.forEach((DocumentSnapshot snap) => {
-      questions.add(snap.data["ques"]),
-      anschoice.add(List.of([snap.data["A"],snap.data["B"],snap.data["C"],snap.data["D"]])),
-      answers.add(snap.data["ans"]),
-    });
+          questions.add(snap.data["ques"]),
+          anschoice.add(List.of([
+            snap.data["A"],
+            snap.data["B"],
+            snap.data["C"],
+            snap.data["D"]
+          ])),
+          answers.add(snap.data["ans"]),
+        });
 
     print(questions);
     print(anschoice);
     print(answers);
 
-    setState((){
+    setState(() {
       _loaded = true;
-
     });
   }
-
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    getData();
+    getData(_level);
     //setData();
 //    print(questions);
   }
 
-
-
   @override
   Widget build(BuildContext context) {
-
     final title = Theme.of(context).textTheme.title;
     final subtitle = Theme.of(context).textTheme.subtitle;
     final display1 = Theme.of(context).textTheme.display1;
@@ -72,7 +70,7 @@ class _HomePageState extends State<HomePage> {
     final width = MediaQuery.of(context).size.width;
 
     checkQuestion();
-    if(_loaded) {
+    if (_loaded) {
       return WillPopScope(
         onWillPop: () async => false,
         child: Scaffold(
@@ -131,6 +129,7 @@ class _HomePageState extends State<HomePage> {
                       style: display1,
                     ),
                     Text(
+
                       _level.toString(),
                       style: display1,
                     ),
@@ -168,18 +167,36 @@ class _HomePageState extends State<HomePage> {
               choices(anschoice[qno][3], 3, radioValue),
               //Next or Submit buttons
               button(),
-                  ],
-                ),
 
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: GestureDetector(
+                  child: Text(
+                    "Next Level",
+                    style: TextStyle(fontSize: 44.0),
+                  ),
+                  onTap: () {
+                    setState(() async {
+                      _level++;
+                      questions = [];
+                      anschoice = [];
+                      answers = [];
+                      await getData(_level);
+                    });
+                  },
+                ),
               ),
-        );
-    }
-    else{
+            ],
+          ),
+        ),
+      );
+    } else {
       return Scaffold(
         body: Center(
-          child: Text("Loading",style: TextStyle(
-            fontSize:20
-          ),),
+          child: Text(
+            "Loading",
+            style: TextStyle(fontSize: 20),
+          ),
         ),
       );
     }
@@ -205,14 +222,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget button(){
-  if(!_last) {
-    return
-      Container(
+  Widget button() {
+    if (!_last) {
+      return Container(
         padding: const EdgeInsets.all(2.0),
         decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(100.0),
-            color: Colors.red),
+            borderRadius: BorderRadius.circular(100.0), color: Colors.red),
         child: MaterialButton(
             minWidth: 200.0,
             child: Text("Next", style: _btnStyle()),
@@ -222,33 +237,33 @@ class _HomePageState extends State<HomePage> {
                   qno++;
                 });
               }
-            }
+            }),
+      );
+    } else {
+      return Container(
+        padding: const EdgeInsets.all(2.0),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(100.0), color: Colors.red),
+        child: Column(
+          children: <Widget>[
+            MaterialButton(
+              minWidth: 200.0,
+              child: Text("Submit", style: _btnStyle()),
+              onPressed: () {
+                if (checkAnswer()) {
+                  refresh();
+                }
+              },
+            ),
+          ],
         ),
       );
-  }
-   else {
-     return Container(
-      padding: const EdgeInsets.all(2.0),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(100.0),
-          color: Colors.red),
-      child: MaterialButton(
-        minWidth: 200.0,
-        child: Text("Submit", style: _btnStyle()),
-        onPressed: () {
-          if (checkAnswer()) {
-            refresh();
-          }
-        },
-      ),
-    );
-            // updateQuestion();
+      // updateQuestion();
     }
   }
 
-  bool checkAnswer(){
-    if (anschoice[qno][radioValue] ==
-        answers[qno]) {
+  bool checkAnswer() {
+    if (anschoice[qno][radioValue] == answers[qno]) {
       finalScore++;
       return true;
     } else {
@@ -259,13 +274,12 @@ class _HomePageState extends State<HomePage> {
             children: <Widget>[
               Column(
                 children: <Widget>[
-                  Text("Wrong answer! Correct answer is "+answers[qno]),
+                  Text("Wrong answer! Correct answer is " + answers[qno]),
                   Text("Please select right choice to continue.")
                 ],
               ),
             ],
           ),
-
         ),
       );
       return false;
@@ -286,17 +300,18 @@ class _HomePageState extends State<HomePage> {
 
   void checkQuestion() {
     setState(() {
-      if (qno == questions.length-1) {
+      if (qno == questions.length - 1) {
         _last = true;
+
       }
     });
   }
 
-  refresh() async{
+  refresh() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    finalScore =_level *10;
+    finalScore = _level * 10;
     setState(() {
-    //prefs.setInt("level", _level++);
+      //prefs.setInt("level", _level++);
     });
   }
 }
