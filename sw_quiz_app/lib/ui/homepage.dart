@@ -16,49 +16,18 @@ class _HomePageState extends State<HomePage> {
   var qno = 0;
   var finalScore = 0;
   var _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  var _level=1;
+  var _uid;
+  var _level;
   static List<String> questions = new List();
   static List<List<String>> anschoice = new List();
   static List<String> answers = new List();
-
-  getData(int _level) async {
-//    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    List<DocumentSnapshot> list;
-    CollectionReference collectionReference = Firestore.instance
-        .collection("levels/njo6yAWcxYnIRzmVL1G9/" + _level.toString());
-    QuerySnapshot querySnapshot = await collectionReference.getDocuments();
-
-    list = querySnapshot.documents;
-    // ignore: sdk_version_set_literal
-    list.forEach((DocumentSnapshot snap) => {
-          questions.add(snap.data["ques"]),
-          anschoice.add(List.of([
-            snap.data["A"],
-            snap.data["B"],
-            snap.data["C"],
-            snap.data["D"]
-          ])),
-          answers.add(snap.data["ans"]),
-        });
-
-    print(questions);
-    print(anschoice);
-    print(answers);
-
-    setState(() {
-      _loaded = true;
-    });
-  }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    getData(_level);
-    //setData();
-//    print(questions);
+    getuid();
+    getData();
   }
 
   @override
@@ -156,7 +125,7 @@ class _HomePageState extends State<HomePage> {
                 padding: const EdgeInsets.all(8.0),
                 alignment: Alignment.topLeft,
                 child: Text(
-                  questions[qno],
+                  questions [qno],
                   style: title,
                 ),
               ),
@@ -167,25 +136,6 @@ class _HomePageState extends State<HomePage> {
               choices(anschoice[qno][3], 3, radioValue),
               //Next or Submit buttons
               button(),
-
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: GestureDetector(
-                  child: Text(
-                    "Next Level",
-                    style: TextStyle(fontSize: 44.0),
-                  ),
-                  onTap: () {
-                    setState(() async {
-                      _level++;
-                      questions = [];
-                      anschoice = [];
-                      answers = [];
-                      await getData(_level);
-                    });
-                  },
-                ),
-              ),
             ],
           ),
         ),
@@ -204,7 +154,6 @@ class _HomePageState extends State<HomePage> {
 
   Widget choices(String choice, int value, int radioValue) {
     return Container(
-      // padding: const EdgeInsets.all(20.0),
       child: Row(
         children: <Widget>[
           Radio<int>(
@@ -248,18 +197,57 @@ class _HomePageState extends State<HomePage> {
           children: <Widget>[
             MaterialButton(
               minWidth: 200.0,
-              child: Text("Submit", style: _btnStyle()),
+              child: Text("Next Level", style: _btnStyle()),
               onPressed: () {
                 if (checkAnswer()) {
-                  refresh();
-                }
-              },
+                    changeLevel();
+                  setState(() {
+                    _loaded = false;
+                    qno=0;
+
+                });
+                      }
+                  },
             ),
           ],
         ),
       );
-      // updateQuestion();
     }
+  }
+
+  void getuid() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    _uid = (prefs.getString("uid") ?? createDoc());
+  }
+  getData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    _level = (prefs.getInt('level') ?? 1);
+
+    List<DocumentSnapshot> list;
+    CollectionReference collectionReference = Firestore.instance
+        .collection("levels/njo6yAWcxYnIRzmVL1G9/" + _level.toString());
+    QuerySnapshot querySnapshot = await collectionReference.getDocuments();
+
+    list = querySnapshot.documents;
+    // ignore: sdk_version_set_literal
+    list.forEach((DocumentSnapshot snap) => {
+          questions.add(snap.data["ques"]),
+          anschoice.add(List.of([
+            snap.data["A"],
+            snap.data["B"],
+            snap.data["C"],
+            snap.data["D"]
+          ])),
+          answers.add(snap.data["ans"]),
+        });
+
+    print(questions);
+    print(anschoice);
+    print(answers);
+
+    setState(() {
+      _loaded = true;
+    });
   }
 
   bool checkAnswer() {
@@ -309,9 +297,27 @@ class _HomePageState extends State<HomePage> {
 
   refresh() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    finalScore = _level * 10;
     setState(() {
       //prefs.setInt("level", _level++);
     });
   }
+
+  String createDoc(){
+    DocumentReference documentReference = Firestore.instance.collection("users").document();
+    documentReference.setData({"score":0});
+    return documentReference.documentID;
+  }
+
+  void changeLevel() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    finalScore = _level * 10;
+    Firestore.instance.collection("users").document(_uid).updateData({"score":finalScore});
+    _level++;
+    prefs.setInt("level", _level);
+    questions.clear();
+    anschoice.clear();
+    answers.clear();
+    await getData();
+  }
+
 }
