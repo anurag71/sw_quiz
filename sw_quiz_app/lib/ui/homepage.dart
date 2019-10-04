@@ -28,6 +28,9 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     getuid();
     getData();
+    setState(() {
+      radioValue = -1;
+    });
   }
 
   @override
@@ -184,6 +187,8 @@ class _HomePageState extends State<HomePage> {
               if (checkAnswer()) {
                 setState(() {
                   qno++;
+                    // set the radio value to -1 inorder to uncheck the value by default
+                   radioValue = -1;
                 });
               }
             }),
