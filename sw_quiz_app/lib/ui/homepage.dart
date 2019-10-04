@@ -7,11 +7,19 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // var radioValue = -1;
   var radioValue = 0;
   var qno = 0;
   var finalScore = 0;
   var data = Data();
   var _scaffoldKey = GlobalKey<ScaffoldState>();
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      radioValue = -1;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -219,6 +227,8 @@ class _HomePageState extends State<HomePage> {
                 builder: (context) => ResultPage(score: "$finalScore")));
       } else {
         qno++;
+        // set the radio value to -1 inorder to uncheck the value by default
+        radioValue = -1;
       }
     });
   }
